@@ -1,7 +1,7 @@
-from database import engine, Session, ProductsMapping
+from database import engine, Session
 
 # Создание таблицы ProductsMapping, если она еще не создана
-ProductsMapping.__table__.create(bind=engine, checkfirst=True)
+# ProductsMapping.__table__.create(bind=engine, checkfirst=True)
 
 # Функция для добавления тестовой записи в таблицу ProductsMapping
 def add_test_product_mapping():

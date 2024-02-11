@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
+
 class ProductsMapping(Base):
     __tablename__ = 'products_mapping'
 
