@@ -64,4 +64,5 @@ engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
 # Создание всех таблиц
-Base.metadata.create_all(engine)
+# Данная команда закоментирована, т.к. таблицы создает Alembic
+# Base.metadata.create_all(engine)
