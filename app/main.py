@@ -1,6 +1,6 @@
 import requests
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
 
@@ -9,8 +9,15 @@ load_dotenv(override=True)
 # Параметры для запроса
 ARTICLE_NUMBER = os.getenv("ARTICLE_NUMBER")  # Пример артикула
 MAX_REVIEWS_PER_REQUEST = 5000  # Максимум отзывов за один запрос
-isAnswered = 'true'  # Пример значения параметра isAnswered
-API_TOKEN = os.getenv("api_token")  # Замените на ваш фактический токен API
+# isAnswered = 'true'  # Пример значения параметра isAnswered
+API_TOKEN = os.getenv("api_token")  # токен api из .env
+
+
+# Начало предыдущего дня в Unix timestamp
+start_of_yesterday = int((datetime.now() - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0).timestamp())
+
+# Конец предыдущего дня в Unix timestamp
+end_of_yesterday = int((datetime.now() - timedelta(days=1)).replace(hour=23, minute=59, second=59, microsecond=999999).timestamp())
 
 
 
