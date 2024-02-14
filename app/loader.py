@@ -1,6 +1,4 @@
 import time
-from datetime import datetime
-
 from app.DAO import ReviewDAO
 import os
 from dotenv import load_dotenv
@@ -60,3 +58,61 @@ class ReviewsLoader:
         transformed_reviews = [self.transform_review_data(review) for review in all_reviews]
         return transformed_reviews
 
+
+import requests
+from datetime import datetime
+
+import requests
+from models import Feedback, ProductDetails, Session
+
+class FeedbackLoader:
+    def __init__(self, api_url, params):
+        self.api_url = api_url
+        self.params = params
+
+    def fetch_feedbacks(self):
+        response = requests.get(self.api_url, params=self.params)
+        response.raise_for_status()  # Поднимает исключение при HTTP ошибке
+        return response.json()
+
+    def parse_feedback(self, feedback_json):
+        # Сюда можно добавить обработку полей, если это необходимо
+        return feedback_json
+
+    def load_into_db(self, feedbacks_data):
+        session = Session()
+
+        for feedback in feedbacks_data['data']['feedbacks']:
+            # Парсим данные о продукте и создаем объект ProductDetails, если его нет в базе
+            product_detail_data = feedback.pop('productDetails')
+            product_detail = session.query(ProductDetails).filter_by(nmId=product_detail_data['nmId']).first()
+            if not product_detail:
+                product_detail = ProductDetails(**product_detail_data)
+                session.add(product_detail)
+                session.commit()
+
+            # Создаем объект Feedback и связываем его с ProductDetails
+            feedback_data = self.parse_feedback(feedback)
+            feedback_obj = Feedback(**feedback_data, productDetail=product_detail)
+            session.add(feedback_obj)
+
+        try:
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+
+# Пример использования:
+api_url = 'http://example.com/api/v1/feedbacks'  # Замените на ваш URL
+params = {
+    'isAnswered': True,
+    'take': 3,
+    'skip': 0,
+    # другие параметры запроса
+}
+
+loader = FeedbackLoader(api_url, params)
+feedbacks_json = loader.fetch_feedbacks()
+loader.load_into_db(feedbacks_json)

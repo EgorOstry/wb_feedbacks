@@ -1,6 +1,6 @@
 from contextlib import contextmanager
-from app.database import engine, Session
-from app.models import Feedback, ProductsMapping
+from .database import Session
+from .models import Feedback, ProductDetails
 
 @contextmanager
 def session_scope():
@@ -9,28 +9,20 @@ def session_scope():
     try:
         yield session
         session.commit()
-    except:
+    except Exception as e:
+        print(f"Ошибка: {e}")
         session.rollback()
         raise
     finally:
         session.close()
 
-
-class ReviewDAO:
-
-    def add_reviews_to_database(self, reviews):
+class ReviewsDAO:
+    def add_review(self, review_data):
         with session_scope() as session:
-            for review_data in reviews:
-                review = Feedback(**review_data)
-                session.add(review)
+            review = Feedback(**review_data)
+            session.add(review)
 
-    @staticmethod
-    def get_max_review_date_by_article(external_code):
+    def add_product_details(self, product_details_data):
         with session_scope() as session:
-            max_date = session.query(Feedback.created_date)\
-                .join(ProductsMapping, ProductsMapping.external_code == Feedback.nm_id)\
-                .filter(ProductsMapping.external_code == external_code)\
-                .order_by(Feedback.created_date.desc())\
-                .first()
-            return max_date[0] if max_date else None
+            details = ProductDetails(**product
 
