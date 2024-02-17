@@ -1,6 +1,7 @@
 from contextlib import contextmanager
-from .database import Session
-from .models import Feedback, ProductDetails
+from app.database import Session
+from app.models import Feedback, ProductDetails
+
 
 @contextmanager
 def session_scope():
@@ -16,13 +17,36 @@ def session_scope():
     finally:
         session.close()
 
+
 class ReviewsDAO:
-    def add_review(self, review_data):
-        with session_scope() as session:
-            review = Feedback(**review_data)
-            session.add(review)
 
-    def add_product_details(self, product_details_data):
-        with session_scope() as session:
-            details = ProductDetails(**product
+    def __init__(self, product_detail, feedback):
+        self.product_detail = product_detail
+        self.feedback = feedback
 
+    @staticmethod
+    def get_max_review_date_by_article(nmId):
+        with session_scope() as session:
+            max_date = session.query(Feedback.createdDate). \
+                join(ProductDetails, ProductDetails.id == Feedback.productDetailId). \
+                filter(ProductDetails.nmId == nmId). \
+                order_by(Feedback.createdDate.desc()). \
+                first()
+            return max_date[0] if max_date else None
+
+    @staticmethod
+    def check_product_detail(product_details_data):
+        with session_scope() as session:
+            product_detail = session.query(ProductDetails).filter_by(nmId=product_details_data['nmId']).first()
+            if not product_detail:
+                product_detail = ProductDetails(**product_details_data)
+                session.add(product_detail)
+                session.flush()
+            return product_detail.id
+
+    @staticmethod
+    def add_review(feedbacks_data):
+        with session_scope() as session:
+            for feedback in feedbacks_data:
+                feedback_obj = Feedback(**feedback)
+                session.add(feedback_obj)
