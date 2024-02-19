@@ -1,4 +1,7 @@
 import os
+import time
+from datetime import datetime
+
 from dotenv import load_dotenv
 from app.loader import FeedbackLoader
 from app.articles import load_articles_from_xls
@@ -7,10 +10,12 @@ load_dotenv(override=True)
 
 api_token = os.getenv("api_token")
 api_url = os.getenv("api_url")
-# external_code = os.getenv("ARTICLE_NUMBER")
 take = 5000
 skip = 0
 articles = load_articles_from_xls()
+
+last_call_time = 0
+min_interval = 1
 
 headers = {'Authorization': f'{api_token}'}
 
@@ -26,11 +31,21 @@ params = {
 
 
 def main(api_url, headers, params):
+    global last_call_time
     for article in articles:
-        loader = FeedbackLoader(api_url, headers, params, article)
-        loader.load_reviews()
 
-    return 'completed'
+        current_time = time.time()
+        if current_time - last_call_time < min_interval:
+            time.sleep(
+                min_interval - (current_time - last_call_time)
+            )
+        last_call_time = time.time()
+        loader = FeedbackLoader(api_url, headers, params, article)
+        qty = loader.load_reviews()
+        print("Загружено ", qty, " отзывов по артикулу ", article, ", окончание загрузки в ",
+              datetime.fromtimestamp(current_time).strftime('%Y-%m-%d %H:%M:%S'))
+
+    return print('completed')
 
 
 if __name__ == '__main__':

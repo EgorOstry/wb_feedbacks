@@ -5,6 +5,9 @@ import time
 from app.DAO import ReviewsDAO
 from copy import deepcopy
 
+# last_call_time = 0
+# min_interval = 1
+
 
 class FeedbackLoader:
     def __init__(self, api_url, headers, params, article):
@@ -34,22 +37,18 @@ class FeedbackLoader:
         feedbacks = []
         for isAnswered in [True, False]:
             feedbacks.extend(self.get_reviews(isAnswered, dateFrom))
-        ReviewsDAO.add_review(feedbacks)
-        return feedbacks
+        qty = ReviewsDAO.add_review(feedbacks)
+        return qty
 
     def get_reviews(self, isAnswered, dateFrom):
-        # max_review_date = ReviewsDAO.get_max_review_date_by_article(int(self.params["nmId"]))
-        # if max_review_date is not None:
-        #     # Проверяем, находится ли max_review_date в UTC
-        #     if not max_review_date.tzinfo:
-        #         max_review_date = pytz.utc.localize(max_review_date)
-        #
-        #     # Добавляем 1 секунду к максимальной дате
-        #     next_second_utc = max_review_date + timedelta(seconds=1)
-        #
-        #     # Получаем Unix timestamp
-        #     timestamp = int(next_second_utc.timestamp())
-        #     self.params["dateFrom"] = timestamp
+
+        # global last_call_time
+        # current_time = time.time()
+        # if current_time - last_call_time < min_interval:
+        #     time.sleep(
+        #         min_interval - (current_time - last_call_time + 1)
+        #     )
+        #     last_call_time = time.time()
 
         params_copy = deepcopy(self.params)
         params_copy["isAnswered"] = isAnswered
@@ -59,7 +58,9 @@ class FeedbackLoader:
 
         while True:
             response = requests.get(self.api_url, headers=self.headers, params=params_copy)
-            if response.status_code != 200:
+            if response.status_code == 429:
+                time.sleep(60)
+            elif response.status_code != 200:
                 print(f"Ошибка запроса: {response.status_code}")
                 break
 
@@ -71,7 +72,7 @@ class FeedbackLoader:
 
             params_copy['skip'] = str(int(params_copy['skip']) + int(params_copy['take']))
 
-            time.sleep(1)
+            time.sleep(0.5)
 
         feedbacks_data = self.transform_feedbacks(reviews)
 

@@ -44,9 +44,15 @@ class ReviewsDAO:
                 session.flush()
             return product_detail.id
 
+    # @staticmethod
+    # def add_review(feedbacks_data):
+    #     with session_scope() as session:
+    #         for feedback in feedbacks_data:
+    #             feedback_obj = Feedback(**feedback)
+    #             session.add(feedback_obj)
+
     @staticmethod
     def add_review(feedbacks_data):
         with session_scope() as session:
-            for feedback in feedbacks_data:
-                feedback_obj = Feedback(**feedback)
-                session.add(feedback_obj)
+            session.bulk_insert_mappings(Feedback, feedbacks_data)
+            return len(feedbacks_data)
