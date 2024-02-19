@@ -1,6 +1,10 @@
-requests
+requests~=2.31.0
 pandas
-sqlalchemy
+sqlalchemy~=2.0.27
 psycopg2-binary
-python-dotenv
-alembic
+python-dotenv~=1.0.1
+alembic~=1.13.1
+
+pytz~=2024.1
+
+openpyxl
