@@ -5,9 +5,6 @@ import time
 from app.DAO import ReviewsDAO
 from copy import deepcopy
 
-# last_call_time = 0
-# min_interval = 1
-
 
 class FeedbackLoader:
     def __init__(self, api_url, headers, params, article):
@@ -41,14 +38,6 @@ class FeedbackLoader:
         return qty
 
     def get_reviews(self, isAnswered, dateFrom):
-
-        # global last_call_time
-        # current_time = time.time()
-        # if current_time - last_call_time < min_interval:
-        #     time.sleep(
-        #         min_interval - (current_time - last_call_time + 1)
-        #     )
-        #     last_call_time = time.time()
 
         params_copy = deepcopy(self.params)
         params_copy["isAnswered"] = isAnswered
