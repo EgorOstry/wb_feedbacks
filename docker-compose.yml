@@ -1,16 +1,17 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:latest
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2019-latest
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASS}
-      POSTGRES_DB: ${DB_NAME}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      SA_PASSWORD: ${DB_PASS}
+      ACCEPT_EULA: "Y"
     ports:
-      - "${DB_PORT}:5432"
+      - "${DB_PORT}:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+
 
 volumes:
-  postgres_data:
+  mssql_data:
+    driver: local
